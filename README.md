@@ -2,14 +2,8 @@
 
 Main working folder is `./GAT_r_adaptivity/`
 
-Master text is in `master_text`
+Run `./GAT_r_adaptivity/`
 
-## Ideas
-
-1. Use XGBoost instead as it is better for structured data
-
-* Supervised learning, have the "correct" patterns
-* Unsupervised to and then label the most "correct"
 
 ## Resources
 
