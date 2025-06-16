@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNN-enhanced Mesh Refinement for FEM using GNNs &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">GAT_r_adaptivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">DNN-enhanced Mesh Refinement for FEM using GNNs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dnn-enhanced-mesh-refinement-for-fem-using-gnns">
+<h1>DNN-enhanced Mesh Refinement for FEM using GNNs<a class="headerlink" href="#dnn-enhanced-mesh-refinement-for-fem-using-gnns" title="Link to this heading"></a></h1>
+<a class="reference internal image-reference" href="gnn_mesh_refinement.png#Replacewitharelevantimage/diagram"><img alt="gnn_mesh_refinement.png#Replacewitharelevantimage/diagram" class="align-center" src="gnn_mesh_refinement.png#Replacewitharelevantimage/diagram" style="width: 500px;" />
+</a>
+<p>This documentation details a novel approach to Finite Element Method (FEM) mesh refinement using Graph Neural Networks (GNNs).  The project explores the application of various GNN architectures to optimize mesh quality through r-adaptivity, leading to improved accuracy and efficiency in FEM simulations.</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p>Finite Element Method (FEM) simulations are crucial in various engineering and scientific fields. However, the accuracy and computational cost of FEM strongly depend on the quality of the mesh.  R-adaptivity, a mesh refinement technique, aims to optimize the mesh by relocating mesh nodes. This project leverages the power of GNNs to predict optimal node positions, surpassing traditional refinement methods.</p>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>GNN-based R-adaptivity:</strong> Utilizes GNNs to predict optimal node locations for r-adaptive mesh refinement.</p></li>
+<li><p><strong>Support for Multiple GNN Architectures:</strong> Evaluates the performance of different GNN models (e.g., GCN, GraphSAGE, GAT) for mesh optimization.</p></li>
+<li><p><strong>Mesh Quality Metrics:</strong> Implements various metrics to assess and improve mesh quality (e.g., element distortion, aspect ratio).</p></li>
+<li><p><strong>Integration with FEM Solvers:</strong> Provides tools and examples for integrating the GNN-driven refinement with existing FEM solvers (e.g., FEniCS).</p></li>
+<li><p><strong>Performance Analysis:</strong> Benchmarks the performance of GNN-based refinement against traditional r-adaptivity methods.</p></li>
+</ul>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Installation:</strong> Follow the instructions in the <span class="xref std std-ref">installation</span> guide to set up the project.</p></li>
+<li><p><strong>Quickstart:</strong> The <span class="xref std std-ref">quickstart</span> section provides a minimal working example of GNN-based mesh refinement.</p></li>
+<li><p><strong>GNN Model Configuration:</strong> Learn how to configure and train different GNN models in the <span class="xref std std-ref">gnn_configuration</span> section.</p></li>
+</ol>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">GAT_r_adaptivity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html">GAT_r_adaptivity package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

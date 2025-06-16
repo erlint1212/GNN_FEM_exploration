@@ -1,0 +1,4 @@
+this derivation will be built:
+  /nix/store/qradyjhqqx82d2p75ygj8pf6w3i5vfqi-python3-3.12.8-env.drv
+building '/nix/store/qradyjhqqx82d2p75ygj8pf6w3i5vfqi-python3-3.12.8-env.drv'...
+created 811 symlinks in user environment

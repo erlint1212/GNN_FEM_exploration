@@ -1,0 +1,10 @@
+dolfin_dg
+master_text
+src/data/*
+.venv
+!GAT_r_adaptivity/
+!GAT_r_adaptivity/models
+master_text/
+*.png
+*.pt
+*.log

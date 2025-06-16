@@ -1,0 +1,32 @@
+{
+    "model_name": "RAdaptGAT_SquareMesh_Poisson_FeatEngV2",
+    "session_timestamp": "20250608_172811",
+    "device": "cuda",
+    "parameters": {
+        "epochs": 100,
+        "learning_rate": 0.001,
+        "batch_size": 8,
+        "num_layers": 4,
+        "hidden_channels": 128,
+        "heads": 8,
+        "dropout": 0.5,
+        "mesh_type": "square",
+        "num_total_samples": 100,
+        "num_validation_samples_benchmarked": 20
+    },
+    "classical_r_adaptivity_times_seconds": {
+        "mean": 0.1440372109413147,
+        "std_dev": 0.1119587152272136,
+        "count": 20
+    },
+    "gat_inference_times_seconds": {
+        "mean": 0.0014586305618286132,
+        "std_dev": 0.0001541437962081139,
+        "count": 20
+    },
+    "l2_error_stats": {
+        "initial_mean": 0.009843189428807103,
+        "classical_adapted_mean": 0.009910930573879264,
+        "gat_adapted_mean": 0.05092422505833874
+    }
+}
