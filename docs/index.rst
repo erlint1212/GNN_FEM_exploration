@@ -30,10 +30,6 @@ Getting Started
    introduction
    installation
    quickstart
-   gnn_configuration
-   mesh_quality_metrics
-   fem_integration
-   performance_analysis
    modules
    contact
 

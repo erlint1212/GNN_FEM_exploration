@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.data_generation &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.data_generation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.data_generation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># data_generation.py</span>
+<span class="kn">import</span> <span class="nn">dolfin</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span> <span class="c1"># For plotting first sample</span>
+
+<span class="c1"># Project-specific imports</span>
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="p">(</span><span class="n">MESH_TYPE</span><span class="p">,</span> <span class="n">MESH_SIZE_MIN</span><span class="p">,</span> <span class="n">MESH_SIZE_MAX</span><span class="p">,</span>
+                    <span class="n">MESH_SIZE_FACTOR_MIN</span><span class="p">,</span> <span class="n">MESH_SIZE_FACTOR_MAX</span><span class="p">,</span>
+                    <span class="n">PIPE_LENGTH</span><span class="p">,</span> <span class="n">PIPE_HEIGHT</span><span class="p">,</span> <span class="n">OBSTACLE_CENTER_X_FACTOR</span><span class="p">,</span>
+                    <span class="n">OBSTACLE_CENTER_Y_FACTOR</span><span class="p">,</span> <span class="n">OBSTACLE_RADIUS_FACTOR</span><span class="p">,</span>
+                    <span class="n">USE_MONITOR_AS_FEATURE</span><span class="p">,</span> <span class="n">MODEL_NAME</span><span class="p">,</span> <span class="n">DEVICE</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">mesh_generators_2</span> <span class="kn">import</span> <span class="n">create_square_mesh</span><span class="p">,</span> <span class="n">create_pipe_with_obstacle_mesh_gmsh</span>
+<span class="kn">from</span> <span class="nn">fenics_mesh_to_pyg_data</span> <span class="kn">import</span> <span class="n">fenics_mesh_to_pyg_data</span>
+<span class="kn">from</span> <span class="nn">fem_utils</span> <span class="kn">import</span> <span class="n">solve_fem_problem</span><span class="p">,</span> <span class="n">calculate_l2_error</span><span class="p">,</span> <span class="n">get_solution_based_monitor_function</span>
+<span class="kn">from</span> <span class="nn">mesh_utils</span> <span class="kn">import</span> <span class="n">dummy_classical_r_adaptivity</span><span class="p">,</span> <span class="n">check_mesh_quality</span>
+
+<div class="viewcode-block" id="generate_dataset">
+<a class="viewcode-back" href="../../src.html#src.data_generation.generate_dataset">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_dataset</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">session_output_dir</span><span class="p">,</span> <span class="n">plot_first_sample_details</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_classical_times</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_initial_errors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_classical_adapted_errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generating </span><span class="si">{</span><span class="n">num_samples</span><span class="si">}</span><span class="s2"> data samples for MESH_TYPE: &#39;</span><span class="si">{</span><span class="n">MESH_TYPE</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
+    
+    <span class="n">generated_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">attempts</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_attempts</span> <span class="o">=</span> <span class="n">num_samples</span> <span class="o">*</span> <span class="mi">3</span> <span class="c1"># Allow more attempts</span>
+
+    <span class="k">while</span> <span class="n">generated_count</span> <span class="o">&lt;</span> <span class="n">num_samples</span> <span class="ow">and</span> <span class="n">attempts</span> <span class="o">&lt;</span> <span class="n">max_attempts</span><span class="p">:</span>
+        <span class="n">attempts</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Attempt </span><span class="si">{</span><span class="n">attempts</span><span class="si">}</span><span class="s2"> for sample </span><span class="si">{</span><span class="n">generated_count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">initial_mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">mesh_dims</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">current_res_info</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="c1"># For logging</span>
+
+        <span class="k">if</span> <span class="n">MESH_TYPE</span> <span class="o">==</span> <span class="s1">&#39;square&#39;</span><span class="p">:</span>
+            <span class="n">nx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">MESH_SIZE_MIN</span><span class="p">,</span> <span class="n">MESH_SIZE_MAX</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">ny</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">MESH_SIZE_MIN</span><span class="p">,</span> <span class="n">MESH_SIZE_MAX</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">initial_mesh</span><span class="p">,</span> <span class="n">mesh_dims</span> <span class="o">=</span> <span class="n">create_square_mesh</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+            <span class="n">current_res_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;nx=</span><span class="si">{</span><span class="n">nx</span><span class="si">}</span><span class="s2">, ny=</span><span class="si">{</span><span class="n">ny</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="n">MESH_TYPE</span> <span class="o">==</span> <span class="s1">&#39;pipe&#39;</span><span class="p">:</span>
+            <span class="n">current_mesh_size_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">MESH_SIZE_FACTOR_MIN</span><span class="p">,</span> <span class="n">MESH_SIZE_FACTOR_MAX</span><span class="p">)</span>
+            <span class="n">initial_mesh</span><span class="p">,</span> <span class="n">mesh_dims</span> <span class="o">=</span> <span class="n">create_pipe_with_obstacle_mesh_gmsh</span><span class="p">(</span>
+                    <span class="n">mesh_size_factor</span><span class="o">=</span><span class="n">current_mesh_size_factor</span><span class="p">,</span>
+                    <span class="n">pipe_length</span><span class="o">=</span><span class="n">PIPE_LENGTH</span><span class="p">,</span> <span class="n">pipe_height</span><span class="o">=</span><span class="n">PIPE_HEIGHT</span><span class="p">,</span>
+                    <span class="n">obstacle_cx_factor</span><span class="o">=</span><span class="n">OBSTACLE_CENTER_X_FACTOR</span><span class="p">,</span>
+                    <span class="n">obstacle_cy_factor</span><span class="o">=</span><span class="n">OBSTACLE_CENTER_Y_FACTOR</span><span class="p">,</span>
+                    <span class="n">obstacle_r_factor</span><span class="o">=</span><span class="n">OBSTACLE_RADIUS_FACTOR</span>
+                    <span class="p">)</span>
+            <span class="n">current_res_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Factor=</span><span class="si">{</span><span class="n">current_mesh_size_factor</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">initial_mesh</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">initial_mesh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">initial_mesh</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Warning: Attempt </span><span class="si">{</span><span class="n">attempts</span><span class="si">}</span><span class="s2">, Sample </span><span class="si">{</span><span class="n">generated_count</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> - initial mesh invalid. Skipping.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">u_initial</span> <span class="o">=</span> <span class="n">solve_fem_problem</span><span class="p">(</span><span class="n">initial_mesh</span><span class="p">,</span> <span class="n">MESH_TYPE</span><span class="p">,</span> <span class="n">mesh_dims</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">u_initial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Warning: Attempt </span><span class="si">{</span><span class="n">attempts</span><span class="si">}</span><span class="s2">, Sample </span><span class="si">{</span><span class="n">generated_count</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> - FEM solve failed on initial mesh. Skipping.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">l2_error_initial</span> <span class="o">=</span> <span class="n">calculate_l2_error</span><span class="p">(</span><span class="n">u_initial</span><span class="p">,</span> <span class="n">MESH_TYPE</span><span class="p">,</span> <span class="n">mesh_dims</span><span class="p">,</span> <span class="n">initial_mesh</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">l2_error_initial</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">:</span>
+             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Warning: Attempt </span><span class="si">{</span><span class="n">attempts</span><span class="si">}</span><span class="s2">, Sample </span><span class="si">{</span><span class="n">generated_count</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> - Initial L2 error indicates problem (</span><span class="si">{</span><span class="n">l2_error_initial</span><span class="si">}</span><span class="s2">). Skipping.&quot;</span><span class="p">)</span>
+             <span class="k">continue</span>
+
+        <span class="n">monitor_vals_np</span> <span class="o">=</span> <span class="n">get_solution_based_monitor_function</span><span class="p">(</span><span class="n">u_initial</span><span class="p">,</span> <span class="n">initial_mesh</span><span class="p">)</span>
+
+        <span class="n">classical_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">optimized_coords_classical</span> <span class="o">=</span> <span class="n">dummy_classical_r_adaptivity</span><span class="p">(</span><span class="n">initial_mesh</span><span class="p">,</span> <span class="n">monitor_vals_np</span><span class="p">,</span> <span class="n">mesh_dimensions</span><span class="o">=</span><span class="n">mesh_dims</span><span class="p">)</span>
+        <span class="n">classical_duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">classical_start_time</span>
+        
+        <span class="n">l2_error_optimized_classical</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="n">optimized_mesh_classical_viz</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">initial_mesh</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">optimized_coords_classical</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">optimized_mesh_classical_viz</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">():</span>
+            <span class="n">optimized_mesh_classical_viz</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">optimized_coords_classical</span>
+            
+            <span class="n">quality_ok</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">check_mesh_quality</span><span class="p">(</span><span class="n">optimized_mesh_classical_viz</span><span class="p">,</span> <span class="s2">&quot;Classical R-Adapt&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quality_ok</span><span class="p">:</span>
+                <span class="n">l2_error_optimized_classical</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">u_optimized_classical</span> <span class="o">=</span> <span class="n">solve_fem_problem</span><span class="p">(</span><span class="n">optimized_mesh_classical_viz</span><span class="p">,</span> <span class="n">MESH_TYPE</span><span class="p">,</span> <span class="n">mesh_dims</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">u_optimized_classical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">l2_error_optimized_classical</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">l2_error_optimized_classical</span> <span class="o">=</span> <span class="n">calculate_l2_error</span><span class="p">(</span><span class="n">u_optimized_classical</span><span class="p">,</span> <span class="n">MESH_TYPE</span><span class="p">,</span> <span class="n">mesh_dims</span><span class="p">,</span> <span class="n">optimized_mesh_classical_viz</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Warning: Attempt </span><span class="si">{</span><span class="n">attempts</span><span class="si">}</span><span class="s2">, Sample </span><span class="si">{</span><span class="n">generated_count</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> - Coord shape mismatch. Skipping FEM solve.&quot;</span><span class="p">)</span>
+            <span class="n">l2_error_optimized_classical</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.0</span>
+
+        <span class="n">add_feat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">USE_MONITOR_AS_FEATURE</span><span class="p">:</span>
+            <span class="n">add_feat</span> <span class="o">=</span> <span class="n">monitor_vals_np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">pyg_data_sample</span> <span class="o">=</span> <span class="n">fenics_mesh_to_pyg_data</span><span class="p">(</span><span class="n">initial_mesh</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">DEVICE</span><span class="p">,</span> <span class="n">additional_features</span><span class="o">=</span><span class="n">add_feat</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">num_nodes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Warning: Attempt </span><span class="si">{</span><span class="n">attempts</span><span class="si">}</span><span class="s2">, Sample </span><span class="si">{</span><span class="n">generated_count</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> - empty PyG graph. Skipping.&quot;</span><span class="p">)</span>
+             <span class="k">continue</span>
+
+        <span class="c1"># --- MODIFICATION: The target &#39;y&#39; is now the displacement vector ---</span>
+        <span class="n">initial_coords_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">initial_mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">optimized_coords_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">optimized_coords_classical</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">displacement</span> <span class="o">=</span> <span class="n">optimized_coords_tensor</span> <span class="o">-</span> <span class="n">initial_coords_tensor</span>
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">displacement</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+        <span class="c1"># --- END MODIFICATION ---</span>
+            
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">classical_time</span> <span class="o">=</span> <span class="n">classical_duration</span>
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">l2_error_initial</span> <span class="o">=</span> <span class="n">l2_error_initial</span>
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">l2_error_classical_adapted</span> <span class="o">=</span> <span class="n">l2_error_optimized_classical</span>
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">num_dofs</span> <span class="o">=</span> <span class="n">u_initial</span><span class="o">.</span><span class="n">function_space</span><span class="p">()</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="k">if</span> <span class="n">u_initial</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">mesh_type_str</span> <span class="o">=</span> <span class="n">MESH_TYPE</span> 
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">mesh_dimensions_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mesh_dims</span><span class="p">)</span> 
+        <span class="n">pyg_data_sample</span><span class="o">.</span><span class="n">original_coords_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">initial_mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            
+        <span class="n">dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyg_data_sample</span><span class="p">)</span>
+        <span class="n">all_classical_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classical_duration</span><span class="p">)</span>
+        <span class="n">all_initial_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l2_error_initial</span><span class="p">)</span>
+        <span class="n">all_classical_adapted_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l2_error_optimized_classical</span><span class="p">)</span>
+        <span class="n">generated_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">plot_first_sample_details</span> <span class="ow">and</span> <span class="n">generated_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Plotting details for first successful sample...&quot;</span><span class="p">)</span>
+            <span class="n">fig_mesh</span><span class="p">,</span> <span class="n">axs_mesh</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">axs_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">initial_mesh</span><span class="p">);</span> <span class="n">axs_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial Mesh (Sample 1, </span><span class="si">{</span><span class="n">current_res_info</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">L2 Err: </span><span class="si">{</span><span class="n">l2_error_initial</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">MESH_TYPE</span> <span class="o">==</span> <span class="s1">&#39;pipe&#39;</span><span class="p">:</span> <span class="n">axs_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">axs_mesh</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">optimized_mesh_classical_viz</span><span class="p">);</span> <span class="n">axs_mesh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Classical Adapted (Sample 1)</span><span class="se">\n</span><span class="s2">L2 Err: </span><span class="si">{</span><span class="n">l2_error_optimized_classical</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">MESH_TYPE</span> <span class="o">==</span> <span class="s1">&#39;pipe&#39;</span><span class="p">:</span> <span class="n">axs_mesh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plot_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">session_output_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">MODEL_NAME</span><span class="si">}</span><span class="s2">_Sample1_Meshes.png&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_filename</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig_mesh</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Saved mesh plot to </span><span class="si">{</span><span class="n">plot_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">generated_count</span> <span class="o">&lt;</span> <span class="n">num_samples</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Only generated </span><span class="si">{</span><span class="n">generated_count</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">num_samples</span><span class="si">}</span><span class="s2"> valid samples after </span><span class="si">{</span><span class="n">max_attempts</span><span class="si">}</span><span class="s2"> attempts.&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">all_classical_times</span><span class="p">,</span> <span class="n">all_initial_errors</span><span class="p">,</span> <span class="n">all_classical_adapted_errors</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

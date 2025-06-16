@@ -1,4 +1,5 @@
 dolfin_dg
+__pycache__
 master_text
 src/data/*
 .venv

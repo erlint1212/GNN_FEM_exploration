@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.mesh_generators_2 &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.mesh_generators_2</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.mesh_generators_2</h1><div class="highlight"><pre>
+<span></span><span class="c1"># mesh_generators_2.py</span>
+<span class="kn">import</span> <span class="nn">dolfin</span> <span class="c1"># Ensure dolfin is imported</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">gmsh</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="c1"># import meshio # No longer strictly needed if only using direct .msh loading for Gmsh</span>
+<span class="c1"># import h5py   # Explicitly removed</span>
+
+<span class="c1"># --- Default Geometry Parameters for Pipe ---</span>
+<span class="n">DEFAULT_PIPE_LENGTH</span> <span class="o">=</span> <span class="mf">3.0</span>
+<span class="n">DEFAULT_PIPE_HEIGHT</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">DEFAULT_OBSTACLE_CENTER_X_FACTOR</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">DEFAULT_OBSTACLE_CENTER_Y_FACTOR</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">DEFAULT_OBSTACLE_RADIUS_FACTOR</span> <span class="o">=</span> <span class="mf">0.15</span> <span class="c1"># Factor of PIPE_HEIGHT</span>
+<span class="n">DEFAULT_GMSH_MESH_SIZE_FACTOR</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># Factor for characteristic length (smaller is finer)</span>
+
+<div class="viewcode-block" id="create_square_mesh">
+<a class="viewcode-back" href="../../src.html#src.mesh_generators_2.create_square_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">create_square_mesh</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a simple FEniCS UnitSquareMesh.</span>
+<span class="sd">    Stores nx and ny in the dimensions dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating Square Mesh: nx=</span><span class="si">{</span><span class="n">nx</span><span class="si">}</span><span class="s2">, ny=</span><span class="si">{</span><span class="n">ny</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Ensure MPI communicator is handled for mesh creation if running in parallel,</span>
+    <span class="c1"># though for this script, it&#39;s often run as a single process.</span>
+    <span class="c1"># Using dolfin.MPI.comm_world by default if not specified.</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">UnitSquareMesh</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
+    <span class="n">dimensions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;center_x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s2">&quot;center_y&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;square&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nx&quot;</span><span class="p">:</span> <span class="n">nx</span><span class="p">,</span> <span class="c1"># Added</span>
+        <span class="s2">&quot;ny&quot;</span><span class="p">:</span> <span class="n">ny</span>  <span class="c1"># Added</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">dimensions</span></div>
+
+
+<div class="viewcode-block" id="create_pipe_with_obstacle_mesh_gmsh">
+<a class="viewcode-back" href="../../src.html#src.mesh_generators_2.create_pipe_with_obstacle_mesh_gmsh">[docs]</a>
+<span class="k">def</span> <span class="nf">create_pipe_with_obstacle_mesh_gmsh</span><span class="p">(</span>
+    <span class="n">pipe_length</span><span class="o">=</span><span class="n">DEFAULT_PIPE_LENGTH</span><span class="p">,</span>
+    <span class="n">pipe_height</span><span class="o">=</span><span class="n">DEFAULT_PIPE_HEIGHT</span><span class="p">,</span>
+    <span class="n">obstacle_cx_factor</span><span class="o">=</span><span class="n">DEFAULT_OBSTACLE_CENTER_X_FACTOR</span><span class="p">,</span>
+    <span class="n">obstacle_cy_factor</span><span class="o">=</span><span class="n">DEFAULT_OBSTACLE_CENTER_Y_FACTOR</span><span class="p">,</span>
+    <span class="n">obstacle_r_factor</span><span class="o">=</span><span class="n">DEFAULT_OBSTACLE_RADIUS_FACTOR</span><span class="p">,</span>
+    <span class="n">mesh_size_factor</span><span class="o">=</span><span class="n">DEFAULT_GMSH_MESH_SIZE_FACTOR</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a FEniCS mesh of a pipe with a circular obstacle using the Gmsh Python API</span>
+<span class="sd">    and loads the .msh file directly into FEniCS.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating Pipe with Obstacle Mesh (Gmsh API, direct .msh load)...&quot;</span><span class="p">)</span>
+    
+    <span class="n">obstacle_cx</span> <span class="o">=</span> <span class="n">pipe_length</span> <span class="o">*</span> <span class="n">obstacle_cx_factor</span>
+    <span class="n">obstacle_cy</span> <span class="o">=</span> <span class="n">pipe_height</span> <span class="o">*</span> <span class="n">obstacle_cy_factor</span>
+    <span class="n">obstacle_r</span> <span class="o">=</span> <span class="n">pipe_height</span> <span class="o">*</span> <span class="n">obstacle_r_factor</span>
+    
+    <span class="n">can_create_obstacle</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">obstacle_r</span> <span class="o">&gt;</span> <span class="mf">1e-3</span> <span class="ow">and</span> <span class="c1"># Using a slightly larger threshold for &quot;valid&quot; radius</span>
+        <span class="n">obstacle_cx</span> <span class="o">-</span> <span class="n">obstacle_r</span> <span class="o">&gt;</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">pipe_length</span> <span class="ow">and</span>
+        <span class="n">obstacle_cx</span> <span class="o">+</span> <span class="n">obstacle_r</span> <span class="o">&lt;</span> <span class="mf">0.999</span> <span class="o">*</span> <span class="n">pipe_length</span> <span class="ow">and</span>
+        <span class="n">obstacle_cy</span> <span class="o">-</span> <span class="n">obstacle_r</span> <span class="o">&gt;</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">pipe_height</span> <span class="ow">and</span>
+        <span class="n">obstacle_cy</span> <span class="o">+</span> <span class="n">obstacle_r</span> <span class="o">&lt;</span> <span class="mf">0.999</span> <span class="o">*</span> <span class="n">pipe_height</span>
+    <span class="p">)</span>
+
+<span class="c1"># Define characteristic lengths</span>
+    <span class="k">if</span> <span class="n">can_create_obstacle</span><span class="p">:</span>
+        <span class="n">base_char_len_calc</span> <span class="o">=</span> <span class="n">obstacle_r</span> 
+        <span class="n">obstacle_points_char_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base_char_len_calc</span><span class="p">,</span> <span class="n">pipe_height</span><span class="p">)</span> <span class="o">*</span> <span class="n">mesh_size_factor</span> <span class="o">*</span> <span class="mf">0.5</span> 
+        <span class="n">domain_char_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">base_char_len_calc</span><span class="p">,</span> <span class="n">pipe_height</span><span class="p">)</span> <span class="o">*</span> <span class="n">mesh_size_factor</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">domain_char_len</span> <span class="o">=</span> <span class="n">pipe_height</span> <span class="o">*</span> <span class="n">mesh_size_factor</span>
+        <span class="n">obstacle_points_char_len</span> <span class="o">=</span> <span class="n">domain_char_len</span> 
+
+    <span class="n">domain_char_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">domain_char_len</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span> 
+    <span class="n">obstacle_points_char_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">obstacle_points_char_len</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
+
+    <span class="n">temp_msh_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;temp_mesh_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="si">}</span><span class="s2">.msh&quot;</span>
+    <span class="n">fenics_mesh</span> <span class="o">=</span> <span class="kc">None</span> 
+    <span class="n">actual_obstacle_radius</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">mesh_generated_successfully_by_gmsh</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># It&#39;s good practice to check if gmsh is initialized if running in scripts that might call this multiple times.</span>
+    <span class="c1"># However, for a typical single run, direct initialize/finalize is fine.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">isInitialized</span><span class="p">():</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    
+    <span class="c1"># Check if model already exists to avoid error, or add a new one.</span>
+    <span class="n">current_model_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;pipe_obstacle_</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">current_model_name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c1"># If add fails, it might be because a model is already there from a previous run not finalized</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: Gmsh model add failed (possibly already exists or other issue): </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Clearing and adding.&quot;</span><span class="p">)</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span> <span class="c1"># Clear all models and start fresh</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span> <span class="c1"># Re-initialize after clear</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">current_model_name</span><span class="p">)</span>
+
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">setNumber</span><span class="p">(</span><span class="s2">&quot;General.Terminal&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">domain_char_len</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="n">pipe_length</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">domain_char_len</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="n">pipe_length</span><span class="p">,</span> <span class="n">pipe_height</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">domain_char_len</span><span class="p">)</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pipe_height</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">domain_char_len</span><span class="p">)</span>
+        <span class="n">l1</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addLine</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+        <span class="n">l2</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addLine</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+        <span class="n">l3</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addLine</span><span class="p">(</span><span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">)</span>
+        <span class="n">l4</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addLine</span><span class="p">(</span><span class="n">p4</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+        <span class="n">cl_rect</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addCurveLoop</span><span class="p">([</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">l3</span><span class="p">,</span> <span class="n">l4</span><span class="p">])</span>
+        <span class="n">s_final_surface_tag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">can_create_obstacle</span><span class="p">:</span>
+            <span class="n">pc</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="n">obstacle_cx</span><span class="p">,</span> <span class="n">obstacle_cy</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">obstacle_points_char_len</span><span class="p">)</span>
+            <span class="n">p_c1</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="n">obstacle_cx</span> <span class="o">+</span> <span class="n">obstacle_r</span><span class="p">,</span> <span class="n">obstacle_cy</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">obstacle_points_char_len</span><span class="p">)</span>
+            <span class="n">p_c2</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="n">obstacle_cx</span> <span class="o">-</span> <span class="n">obstacle_r</span><span class="p">,</span> <span class="n">obstacle_cy</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">obstacle_points_char_len</span><span class="p">)</span>
+            <span class="n">c_arc1</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addCircleArc</span><span class="p">(</span><span class="n">p_c1</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">p_c2</span><span class="p">)</span>
+            <span class="n">c_arc2</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addCircleArc</span><span class="p">(</span><span class="n">p_c2</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">p_c1</span><span class="p">)</span>
+            <span class="n">cl_circle</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addCurveLoop</span><span class="p">([</span><span class="n">c_arc1</span><span class="p">,</span> <span class="n">c_arc2</span><span class="p">])</span>
+            <span class="n">s_final_surface_tag</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPlaneSurface</span><span class="p">([</span><span class="n">cl_rect</span><span class="p">,</span> <span class="n">cl_circle</span><span class="p">])</span>
+            <span class="n">actual_obstacle_radius</span> <span class="o">=</span> <span class="n">obstacle_r</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gmsh surface with obstacle hole defined using addPlaneSurface.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Obstacle parameters invalid or obstacle too close to boundary. Meshing pipe without obstacle.&quot;</span><span class="p">)</span>
+            <span class="n">s_final_surface_tag</span> <span class="o">=</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">addPlaneSurface</span><span class="p">([</span><span class="n">cl_rect</span><span class="p">])</span>
+            <span class="n">actual_obstacle_radius</span> <span class="o">=</span> <span class="mf">0.0</span>
+        
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">s_final_surface_tag</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Gmsh: Final surface was not created.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Physical group for the 2D surface</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">addPhysicalGroup</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">s_final_surface_tag</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fluid_domain&quot;</span><span class="p">)</span>
+        
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">option</span><span class="o">.</span><span class="n">setNumber</span><span class="p">(</span><span class="s2">&quot;Mesh.MshFileVersion&quot;</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">)</span> <span class="c1"># Crucial for FEniCS compatibility</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">temp_msh_filename</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gmsh mesh written to </span><span class="si">{</span><span class="n">temp_msh_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">mesh_generated_successfully_by_gmsh</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e_gmsh</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during Gmsh (model: </span><span class="si">{</span><span class="n">gmsh</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getCurrent</span><span class="p">()</span><span class="si">}</span><span class="s2">) geometry/meshing: </span><span class="si">{</span><span class="n">e_gmsh</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">traceback</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+    <span class="c1"># No finally for gmsh.finalize() here, let it be handled outside or at end of script if multiple calls</span>
+    <span class="c1"># For safety, if you call this function multiple times in a script, ensure gmsh.finalize() is handled appropriately.</span>
+    <span class="c1"># If this is the only gmsh interaction per script run, finalize at the end of this function is okay.</span>
+    <span class="c1"># However, if another function also uses gmsh, it might need gmsh to be initialized.</span>
+    <span class="c1"># Let&#39;s keep finalize here assuming this function is self-contained for one mesh gen.</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">isInitialized</span><span class="p">():</span>
+            <span class="n">gmsh</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+
+    <span class="c1"># --- Load MSH directly into FEniCS, bypassing meshio for this step ---</span>
+    <span class="k">if</span> <span class="n">mesh_generated_successfully_by_gmsh</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_msh_filename</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">temp_msh_filename</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempting to load GMSH MSH file directly with dolfin.Mesh: </span><span class="si">{</span><span class="n">temp_msh_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Pass MPI communicator for FEniCS mesh if running in parallel</span>
+            <span class="n">fenics_mesh</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">dolfin</span><span class="o">.</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">temp_msh_filename</span><span class="p">)</span> <span class="c1"># Direct load</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FEniCS mesh loaded directly from MSH with </span><span class="si">{</span><span class="n">fenics_mesh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span><span class="si">}</span><span class="s2"> cells and </span><span class="si">{</span><span class="n">fenics_mesh</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">()</span><span class="si">}</span><span class="s2"> vertices.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fenics_mesh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Loaded FEniCS mesh via dolfin.Mesh from MSH is empty (0 cells).&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e_direct_load</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error during direct dolfin.Mesh MSH loading: </span><span class="si">{</span><span class="n">e_direct_load</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">traceback</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">fenics_mesh</span> <span class="o">=</span> <span class="kc">None</span> 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mesh_generated_successfully_by_gmsh</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Skipping FEniCS mesh loading because Gmsh did not complete successfully.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping FEniCS mesh loading: MSH file &#39;</span><span class="si">{</span><span class="n">temp_msh_filename</span><span class="si">}</span><span class="s2">&#39; not found or empty.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Cleanup temporary MSH file</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">temp_msh_filename</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_msh_filename</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Temporary file </span><span class="si">{</span><span class="n">temp_msh_filename</span><span class="si">}</span><span class="s2"> removed.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e_remove</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Could not remove temporary file </span><span class="si">{</span><span class="n">temp_msh_filename</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e_remove</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">pass</span> 
+
+    <span class="c1"># Fallback to dummy mesh if fenics_mesh is still None or empty</span>
+    <span class="k">if</span> <span class="n">fenics_mesh</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">fenics_mesh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FEniCS mesh is invalid or empty after Gmsh/direct MSH load. Returning a dummy mesh.&quot;</span><span class="p">)</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">pipe_length</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">pipe_height</span><span class="p">,</span> <span class="s2">&quot;center_x&quot;</span><span class="p">:</span> <span class="n">pipe_length</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+            <span class="s2">&quot;center_y&quot;</span><span class="p">:</span> <span class="n">pipe_height</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">&quot;obstacle_radius&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> 
+            <span class="s2">&quot;obstacle_center_x&quot;</span><span class="p">:</span> <span class="n">obstacle_cx</span><span class="p">,</span> <span class="s2">&quot;obstacle_center_y&quot;</span><span class="p">:</span> <span class="n">obstacle_cy</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;pipe_fallback_dummy_direct_msh&quot;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">UnitSquareMesh</span><span class="p">(</span><span class="n">dolfin</span><span class="o">.</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">dimensions</span>
+
+
+    <span class="n">dimensions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">pipe_length</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">pipe_height</span><span class="p">,</span> <span class="s2">&quot;center_x&quot;</span><span class="p">:</span> <span class="n">pipe_length</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="s2">&quot;center_y&quot;</span><span class="p">:</span> <span class="n">pipe_height</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">&quot;obstacle_radius&quot;</span><span class="p">:</span> <span class="n">actual_obstacle_radius</span><span class="p">,</span>
+        <span class="s2">&quot;obstacle_center_x&quot;</span><span class="p">:</span> <span class="n">obstacle_cx</span><span class="p">,</span> <span class="s2">&quot;obstacle_center_y&quot;</span><span class="p">:</span> <span class="n">obstacle_cy</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;pipe_gmsh_direct_msh&quot;</span> <span class="c1"># Updated type to reflect direct loading</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">fenics_mesh</span><span class="p">,</span> <span class="n">dimensions</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing mesh_generators_2.py with Gmsh Python API (direct .msh load)...&quot;</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="c1"># Test Square Mesh</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing Square Mesh...&quot;</span><span class="p">)</span>
+    <span class="n">sq_mesh</span><span class="p">,</span> <span class="n">sq_dims</span> <span class="o">=</span> <span class="n">create_square_mesh</span><span class="p">(</span><span class="n">nx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Square mesh created with </span><span class="si">{</span><span class="n">sq_mesh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span><span class="si">}</span><span class="s2"> cells. Dimensions: </span><span class="si">{</span><span class="n">sq_dims</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sq_mesh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sq_mesh</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Test Square Mesh&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;test_square_mesh.png&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved test_square_mesh.png&quot;</span><span class="p">)</span>
+
+
+    <span class="c1"># Test Pipe with Obstacle Mesh using Gmsh direct load</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing Pipe with Obstacle (Gmsh, direct .msh load)...&quot;</span><span class="p">)</span>
+    <span class="c1"># Ensure Gmsh is finalized if it was used before or re-initialize cleanly</span>
+    <span class="k">if</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">isInitialized</span><span class="p">():</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+
+    <span class="n">pipe_mesh_gmsh</span><span class="p">,</span> <span class="n">pipe_dims_gmsh</span> <span class="o">=</span> <span class="n">create_pipe_with_obstacle_mesh_gmsh</span><span class="p">(</span>
+        <span class="n">pipe_length</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">pipe_height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">obstacle_cx_factor</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">obstacle_cy_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">obstacle_r_factor</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="c1"># Valid obstacle</span>
+        <span class="n">mesh_size_factor</span><span class="o">=</span><span class="mf">0.15</span> 
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipe mesh (Gmsh, direct) created with </span><span class="si">{</span><span class="n">pipe_mesh_gmsh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span><span class="si">}</span><span class="s2"> cells. Obstacle radius: </span><span class="si">{</span><span class="n">pipe_dims_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;obstacle_radius&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pipe_mesh_gmsh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">pipe_dims_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;pipe_fallback_dummy_direct_msh&quot;</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">pipe_dims_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">pipe_dims_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span> <span class="k">if</span> <span class="n">pipe_dims_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">4</span> <span class="p">))</span>
+        <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pipe_mesh_gmsh</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Test Pipe with Obstacle (Gmsh API, direct .msh load)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;test_pipe_obstacle_direct_msh.png&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved test_pipe_obstacle_direct_msh.png&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pipe_mesh_gmsh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span> <span class="c1"># Fallback case might still plot a unit square</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pipe_mesh_gmsh</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Test Pipe Fallback Mesh (Gmsh, direct .msh load)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;test_pipe_fallback_direct_msh.png&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved test_pipe_fallback_direct_msh.png&quot;</span><span class="p">)</span>
+
+
+    <span class="c1"># Test pipe without a significant obstacle (should mesh the plain pipe)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Testing Pipe without Obstacle (Gmsh, direct .msh load)...&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gmsh</span><span class="o">.</span><span class="n">isInitialized</span><span class="p">():</span> <span class="c1"># Ensure clean state for Gmsh</span>
+        <span class="n">gmsh</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+    <span class="n">pipe_mesh_no_obs_gmsh</span><span class="p">,</span> <span class="n">pipe_dims_no_obs_gmsh</span> <span class="o">=</span> <span class="n">create_pipe_with_obstacle_mesh_gmsh</span><span class="p">(</span>
+        <span class="n">obstacle_r_factor</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="c1"># Effectively no obstacle</span>
+        <span class="n">mesh_size_factor</span><span class="o">=</span><span class="mf">0.2</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipe mesh (Gmsh, no obs, direct) created with </span><span class="si">{</span><span class="n">pipe_mesh_no_obs_gmsh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span><span class="si">}</span><span class="s2"> cells. Obstacle radius: </span><span class="si">{</span><span class="n">pipe_dims_no_obs_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;obstacle_radius&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pipe_mesh_no_obs_gmsh</span><span class="o">.</span><span class="n">num_cells</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">pipe_dims_no_obs_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;pipe_fallback_dummy_direct_msh&quot;</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">pipe_dims_no_obs_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">pipe_dims_no_obs_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>  <span class="k">if</span> <span class="n">pipe_dims_no_obs_gmsh</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">4</span> <span class="p">))</span>
+        <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pipe_mesh_no_obs_gmsh</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Test Pipe - No Obstacle (Gmsh API, direct .msh load)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;test_pipe_no_obstacle_direct_msh.png&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved test_pipe_no_obstacle_direct_msh.png&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># plt.show() # Comment out for non-interactive runs</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mesh generation tests complete. Check for .png files.&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

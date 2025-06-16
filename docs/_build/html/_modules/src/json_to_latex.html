@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.json_to_latex &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.json_to_latex</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.json_to_latex</h1><div class="highlight"><pre>
+<span></span><span class="c1"># json_to_latex_2.py</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="escape_latex">
+<a class="viewcode-back" href="../../src.html#src.json_to_latex.escape_latex">[docs]</a>
+<span class="k">def</span> <span class="nf">escape_latex</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Escapes special LaTeX characters in a string.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\%&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\&amp;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="format_stat_value">
+<a class="viewcode-back" href="../../src.html#src.json_to_latex.format_stat_value">[docs]</a>
+<span class="k">def</span> <span class="nf">format_stat_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">sci_threshold</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formats a number for the stats table, using scientific notation for small values.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;N/A&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Use scientific notation for small, non-zero numbers</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">sci_threshold</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.</span><span class="si">{</span><span class="n">precision</span><span class="o">-</span><span class="mi">2</span><span class="si">}</span><span class="s2">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.</span><span class="si">{</span><span class="n">precision</span><span class="si">}</span><span class="s2">f</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;N/A&quot;</span></div>
+
+
+<div class="viewcode-block" id="format_ms_value">
+<a class="viewcode-back" href="../../src.html#src.json_to_latex.format_ms_value">[docs]</a>
+<span class="k">def</span> <span class="nf">format_ms_value</span><span class="p">(</span><span class="n">value_seconds</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formats a time value from seconds to milliseconds.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value_seconds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;N/A&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value_ms</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_seconds</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.0</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value_ms</span><span class="si">:</span><span class="s2">.</span><span class="si">{</span><span class="n">precision</span><span class="si">}</span><span class="s2">f</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;N/A&quot;</span></div>
+
+
+<div class="viewcode-block" id="generate_stats_table">
+<a class="viewcode-back" href="../../src.html#src.json_to_latex.generate_stats_table">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_stats_table</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates the detailed statistics LaTeX table.&quot;&quot;&quot;</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">model_name</span> <span class="o">=</span> <span class="n">escape_latex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_name&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">))</span>
+    <span class="n">session_ts</span> <span class="o">=</span> <span class="n">escape_latex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;session_timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">))</span>
+    <span class="n">label_ts</span> <span class="o">=</span> <span class="n">session_ts</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">escape_latex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">))</span>
+    <span class="n">val_samples</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_validation_samples_benchmarked&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">)</span>
+    <span class="n">inf_runs</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inference_runs_per_sample&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">)</span>
+    
+    <span class="n">classical_stats</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;classical_r_adaptivity_times_seconds&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">gat_stats</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gat_inference_times_seconds&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s2">&quot;\begin</span><span class="si">{table}</span><span class="s2">[htbp]&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;  \centering&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;  </span><span class="se">\\</span><span class="s2">caption</span><span class="se">{{</span><span class="s2">Time Benchmark for: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> (Session: </span><span class="si">{</span><span class="n">session_ts</span><span class="si">}</span><span class="s2">). Device: </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">. Validation Samples: </span><span class="si">{</span><span class="n">val_samples</span><span class="si">}</span><span class="s2">. GAT inference avg over </span><span class="si">{</span><span class="n">inf_runs</span><span class="si">}</span><span class="s2"> runs/sample.</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;  </span><span class="se">\\</span><span class="s2">label</span><span class="se">{{</span><span class="s2">tab:benchmark_</span><span class="si">{</span><span class="n">label_ts</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;  \begin</span><span class="si">{tabular}{lrr}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    \toprule&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    Metric &amp; Classical R-Adaptivity (s) &amp; GAT Inference (s) </span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    \midrule&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    Mean     &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">classical_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">gat_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    Median   &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">classical_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">gat_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    Std. Dev.&amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">classical_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;std_dev&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">gat_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;std_dev&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    Min      &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">classical_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">gat_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    Max      &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">classical_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> &amp; </span><span class="si">{</span><span class="n">format_stat_value</span><span class="p">(</span><span class="n">gat_stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    \bottomrule&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;  \end</span><span class="si">{tabular}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\end</span><span class="si">{table}</span><span class="s2">&quot;</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate_comparison_table">
+<a class="viewcode-back" href="../../src.html#src.json_to_latex.generate_comparison_table">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_comparison_table</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates the simple mean time comparison LaTeX table.&quot;&quot;&quot;</span>
+    <span class="n">model_name</span> <span class="o">=</span> <span class="n">escape_latex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_name&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">))</span>
+    <span class="n">session_ts</span> <span class="o">=</span> <span class="n">escape_latex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;session_timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;N/A&quot;</span><span class="p">))</span>
+    <span class="n">label_ts</span> <span class="o">=</span> <span class="n">session_ts</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="n">classical_mean_s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;classical_r_adaptivity_times_seconds&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+    <span class="n">gat_mean_s</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gat_inference_times_seconds&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s2">&quot;\begin</span><span class="si">{table}</span><span class="s2">[htbp]&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;  \centering&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;  </span><span class="se">\\</span><span class="s2">caption</span><span class="se">{{</span><span class="s2">Mesh Adaption Time Comparison: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2"> (Session: </span><span class="si">{</span><span class="n">session_ts</span><span class="si">}</span><span class="s2">).</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;  </span><span class="se">\\</span><span class="s2">label</span><span class="se">{{</span><span class="s2">tab:time_comp_</span><span class="si">{</span><span class="n">label_ts</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;  \begin</span><span class="si">{tabular}{lr}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    \toprule&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    Method                         &amp; Time (ms) </span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    \midrule&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    Classical R-Adaptivity (Dummy) &amp; </span><span class="si">{</span><span class="n">format_ms_value</span><span class="p">(</span><span class="n">classical_mean_s</span><span class="p">,</span><span class="w"> </span><span class="n">precision</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;    GAT R-Adaptivity (Inference)   &amp; </span><span class="si">{</span><span class="n">format_ms_value</span><span class="p">(</span><span class="n">gat_mean_s</span><span class="p">,</span><span class="w"> </span><span class="n">precision</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;    \bottomrule&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;  \end</span><span class="si">{tabular}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\end</span><span class="si">{table}</span><span class="s2">&quot;</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../src.html#src.json_to_latex.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Convert a diagnostic JSON file to LaTeX tables.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;json_file&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to the input JSON diagnostic file.&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">json_file</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: File not found at </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">json_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">stats_table</span> <span class="o">=</span> <span class="n">generate_stats_table</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">comparison_table</span> <span class="o">=</span> <span class="n">generate_comparison_table</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- LaTeX Code ---&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">stats_table</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;%&quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">78</span> <span class="o">+</span> <span class="s2">&quot;%</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">comparison_table</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- End LaTeX Code ---&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Note: You might need to include </span><span class="se">\\</span><span class="s2">usepackage</span><span class="si">{booktabs}</span><span class="s2"> in your LaTeX preamble.&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

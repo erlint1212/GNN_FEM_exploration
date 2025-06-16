@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath('..')) # Add project root to sys.path
                                           # This allows Sphinx to find GAT_r_adaptivity
 
 # You can remove the following line if src is indeed not needed for GAT_r_adaptivity docs
-# sys.path.insert(0, os.path.abspath("../src"))
+sys.path.insert(0, os.path.abspath("../src"))
 
 
 # -- Project information -----------------------------------------------------
@@ -72,6 +72,7 @@ html_header = """
 # install them in your documentation build environment), mock them:
 autodoc_mock_imports = [
     "torch",
+    "torch_geometric",  # <-- Add this line
     "jax",
     "dolfin",
     "dolfin_dg",

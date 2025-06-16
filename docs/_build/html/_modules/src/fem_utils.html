@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.fem_utils &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.fem_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.fem_utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># fem_utils.py</span>
+<span class="kn">import</span> <span class="nn">dolfin</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># Import necessary strings from config, or pass them as arguments</span>
+<span class="kn">from</span> <span class="nn">config</span> <span class="kn">import</span> <span class="p">(</span><span class="n">F_EXPRESSION_STR_SQUARE</span><span class="p">,</span> <span class="n">U_EXACT_EXPRESSION_STR_SQUARE</span><span class="p">,</span>
+                    <span class="n">U_DIRICHLET_EXPRESSION_STR_SQUARE</span><span class="p">,</span> <span class="n">EXACT_SOL_DEGREE_SQUARE</span><span class="p">,</span>
+                    <span class="n">F_EXPRESSION_STR_PIPE</span><span class="p">,</span> <span class="n">U_EXACT_EXPRESSION_STR_PIPE</span><span class="p">,</span>
+                    <span class="n">U_DIRICHLET_EXPRESSION_STR_PIPE</span><span class="p">,</span> <span class="n">EXACT_SOL_DEGREE_PIPE</span><span class="p">,</span>
+                    <span class="n">PIPE_LENGTH</span><span class="p">,</span> <span class="n">PIPE_HEIGHT</span><span class="p">)</span> <span class="c1"># Add other needed config vars</span>
+
+<div class="viewcode-block" id="solve_fem_problem">
+<a class="viewcode-back" href="../../src.html#src.fem_utils.solve_fem_problem">[docs]</a>
+<span class="k">def</span> <span class="nf">solve_fem_problem</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">mesh_type</span><span class="p">,</span> <span class="n">mesh_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solves a Poisson problem on the given mesh.</span>
+<span class="sd">    -Laplace(u) = f</span>
+<span class="sd">    u = u_D on boundary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># Numerical solution is P1</span>
+
+    <span class="k">if</span> <span class="n">mesh_type</span> <span class="o">==</span> <span class="s1">&#39;square&#39;</span><span class="p">:</span>
+        <span class="n">f_expr_str</span> <span class="o">=</span> <span class="n">F_EXPRESSION_STR_SQUARE</span>
+        <span class="n">u_d_expr_str</span> <span class="o">=</span> <span class="n">U_DIRICHLET_EXPRESSION_STR_SQUARE</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="n">f_expr_str</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">user_pi</span><span class="o">=</span><span class="n">dolfin</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="n">u_D</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="n">u_d_expr_str</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">user_pi</span><span class="o">=</span><span class="n">dolfin</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mesh_type</span> <span class="o">==</span> <span class="s1">&#39;pipe&#39;</span><span class="p">:</span>
+        <span class="n">L_pipe</span> <span class="o">=</span> <span class="n">mesh_dimensions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="n">PIPE_LENGTH</span><span class="p">)</span> <span class="k">if</span> <span class="n">mesh_dimensions</span> <span class="k">else</span> <span class="n">PIPE_LENGTH</span>
+        <span class="n">H_pipe</span> <span class="o">=</span> <span class="n">mesh_dimensions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="n">PIPE_HEIGHT</span><span class="p">)</span> <span class="k">if</span> <span class="n">mesh_dimensions</span> <span class="k">else</span> <span class="n">PIPE_HEIGHT</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="n">F_EXPRESSION_STR_PIPE</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="n">L_pipe</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="n">H_pipe</span><span class="p">)</span>
+        <span class="n">u_D</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="n">U_DIRICHLET_EXPRESSION_STR_PIPE</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="n">L_pipe</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="n">H_pipe</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown mesh type for FEM solve: </span><span class="si">{</span><span class="n">mesh_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">boundary</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">on_boundary</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">on_boundary</span>
+    <span class="n">bc</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">u_D</span><span class="p">,</span> <span class="n">boundary</span><span class="p">)</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dolfin</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">*</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">dx</span>
+    <span class="n">L_form</span> <span class="o">=</span> <span class="n">f</span> <span class="o">*</span> <span class="n">v</span> <span class="o">*</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">dx</span>
+
+    <span class="n">u_sol</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dolfin</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">L_form</span><span class="p">,</span> <span class="n">u_sol</span><span class="p">,</span> <span class="n">bc</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FEniCS solver failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Returning None for solution.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">u_sol</span></div>
+
+
+<div class="viewcode-block" id="calculate_l2_error">
+<a class="viewcode-back" href="../../src.html#src.fem_utils.calculate_l2_error">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_l2_error</span><span class="p">(</span><span class="n">u_numerical</span><span class="p">,</span> <span class="n">mesh_type</span><span class="p">,</span> <span class="n">mesh_dimensions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the L2 error of the numerical solution against an exact solution.</span>
+<span class="sd">    Returns -1.0 if no exact solution is defined for the mesh_type, -2.0 if u_numerical is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">u_numerical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mf">2.0</span> <span class="c1"># Indicates solver failure for the numerical solution</span>
+
+    <span class="n">current_mesh</span> <span class="o">=</span> <span class="n">mesh</span> <span class="ow">or</span> <span class="n">u_numerical</span><span class="o">.</span><span class="n">function_space</span><span class="p">()</span><span class="o">.</span><span class="n">mesh</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">mesh_type</span> <span class="o">==</span> <span class="s1">&#39;square&#39;</span><span class="p">:</span>
+        <span class="n">u_exact_str</span> <span class="o">=</span> <span class="n">U_EXACT_EXPRESSION_STR_SQUARE</span>
+        <span class="n">exact_degree</span> <span class="o">=</span> <span class="n">EXACT_SOL_DEGREE_SQUARE</span>
+        <span class="n">u_exact</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="n">u_exact_str</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="n">exact_degree</span><span class="p">,</span> <span class="n">user_pi</span><span class="o">=</span><span class="n">dolfin</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mesh_type</span> <span class="o">==</span> <span class="s1">&#39;pipe&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">U_EXACT_EXPRESSION_STR_PIPE</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span> <span class="c1"># Special value indicating no exact solution for error calculation</span>
+        <span class="n">u_exact_str</span> <span class="o">=</span> <span class="n">U_EXACT_EXPRESSION_STR_PIPE</span>
+        <span class="n">exact_degree</span> <span class="o">=</span> <span class="n">EXACT_SOL_DEGREE_PIPE</span>
+        <span class="n">L_pipe</span> <span class="o">=</span> <span class="n">mesh_dimensions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="n">PIPE_LENGTH</span><span class="p">)</span> <span class="k">if</span> <span class="n">mesh_dimensions</span> <span class="k">else</span> <span class="n">PIPE_LENGTH</span>
+        <span class="n">H_pipe</span> <span class="o">=</span> <span class="n">mesh_dimensions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="n">PIPE_HEIGHT</span><span class="p">)</span> <span class="k">if</span> <span class="n">mesh_dimensions</span> <span class="k">else</span> <span class="n">PIPE_HEIGHT</span>
+        <span class="n">u_exact</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="n">u_exact_str</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="n">exact_degree</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="n">L_pipe</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="n">H_pipe</span><span class="p">,</span> <span class="n">user_pi</span><span class="o">=</span><span class="n">dolfin</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown mesh type for L2 error: </span><span class="si">{</span><span class="n">mesh_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">L2_error</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">errornorm</span><span class="p">(</span><span class="n">u_exact</span><span class="p">,</span> <span class="n">u_numerical</span><span class="p">,</span> <span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="n">current_mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">L2_error</span></div>
+
+
+<div class="viewcode-block" id="get_solution_based_monitor_function">
+<a class="viewcode-back" href="../../src.html#src.fem_utils.get_solution_based_monitor_function">[docs]</a>
+<span class="k">def</span> <span class="nf">get_solution_based_monitor_function</span><span class="p">(</span><span class="n">u_solution</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a monitor function based on the L2 norm of the gradient of the FEM solution.</span>
+<span class="sd">    Returns a NumPy array of nodal values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">u_solution</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: FEM solution is None in get_solution_based_monitor_function. Returning uniform monitor.&quot;</span><span class="p">)</span>
+        <span class="c1"># Ensure the returned array matches the number of vertices if mesh is valid</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">()</span> <span class="k">if</span> <span class="n">mesh</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+
+    <span class="n">V_scalar</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># P1 space for monitor function values</span>
+    <span class="n">grad_u_sq</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">dolfin</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">dolfin</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u_solution</span><span class="p">),</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u_solution</span><span class="p">)),</span> <span class="n">V_scalar</span><span class="p">)</span>
+    <span class="n">monitor_values_nodal</span> <span class="o">=</span> <span class="n">grad_u_sq</span><span class="o">.</span><span class="n">compute_vertex_values</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="c1"># Already nodal for CG1</span>
+
+    <span class="n">min_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">monitor_values_nodal</span><span class="p">)</span>
+    <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">monitor_values_nodal</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_val</span> <span class="o">-</span> <span class="n">min_val</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">:</span> <span class="c1"># Avoid division by zero if gradient is constant (e.g. zero)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">monitor_values_nodal</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    
+    <span class="n">normalized_monitor_values</span> <span class="o">=</span> <span class="p">(</span><span class="n">monitor_values_nodal</span> <span class="o">-</span> <span class="n">min_val</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_val</span> <span class="o">-</span> <span class="n">min_val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">normalized_monitor_values</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

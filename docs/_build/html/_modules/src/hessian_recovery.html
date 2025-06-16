@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.hessian_recovery &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.hessian_recovery</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.hessian_recovery</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">dolfin</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span> <span class="c1"># DataLoader for batching</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.loader</span> <span class="kn">import</span> <span class="n">DataLoader</span> <span class="c1"># Corrected import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span> <span class="c1"># For timing</span>
+<span class="kn">import</span> <span class="nn">os</span> <span class="c1"># For creating output directory</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="c1"># For session timestamps</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># Assuming these are in separate files or defined above as per your setup</span>
+<span class="kn">from</span> <span class="nn">models.GAT</span> <span class="kn">import</span> <span class="n">RAdaptGAT</span>
+<span class="kn">from</span> <span class="nn">fenics_mesh_to_pyg_data</span> <span class="kn">import</span> <span class="n">fenics_mesh_to_pyg_data</span>
+
+<span class="c1"># --- Import functions from your plot_funcs.py ---</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">plot_funcs</span> <span class="c1"># Assumes plot_funcs.py is in the same directory or PYTHONPATH</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: plot_funcs.py not found. Make sure it&#39;s in the same directory or in PYTHONPATH.&quot;</span><span class="p">)</span>
+    <span class="c1"># Define dummy functions if import fails, so the script can still run mostly</span>
+    <span class="k">class</span> <span class="nc">plot_funcs_dummy</span><span class="p">:</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">cuda_status</span><span class="p">(</span><span class="n">device</span><span class="p">):</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dummy cuda_status called for device: </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">density_plot_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dummy density_plot_matrix called for matrix shape: </span><span class="si">{</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> with title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dummy density_plot_matrix called for matrix (type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="si">}</span><span class="s2">) with title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">loss_plot</span><span class="p">(</span><span class="n">epoch_count</span><span class="p">,</span> <span class="n">loss_values</span><span class="p">,</span> <span class="n">test_loss_values</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dummy loss_plot called for model: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">predVStrue</span><span class="p">(</span><span class="n">label_val_true</span><span class="p">,</span> <span class="n">label_val_pred</span><span class="p">,</span> <span class="n">label_train_true</span><span class="p">,</span> <span class="n">label_train_pred</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dummy predVStrue called for model: </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">plot_time_comparison</span><span class="p">(</span><span class="n">classical_times</span><span class="p">,</span> <span class="n">gat_times</span><span class="p">,</span> <span class="n">time_label</span><span class="o">=</span><span class="s1">&#39;Mesh Optimization Time (s)&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_box_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dummy plot_time_comparison called with title: </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">plot_accuracy_vs_cost</span><span class="p">(</span><span class="n">classical_costs</span><span class="p">,</span> <span class="n">classical_accuracies</span><span class="p">,</span> <span class="n">gat_costs</span><span class="p">,</span> <span class="n">gat_accuracies</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dummy plot_accuracy_vs_cost called.&quot;</span><span class="p">)</span>
+        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">plot_convergence</span><span class="p">(</span><span class="n">classical_dofs</span><span class="p">,</span> <span class="n">classical_errors</span><span class="p">,</span> <span class="n">gat_dofs</span><span class="p">,</span> <span class="n">gat_errors</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dummy plot_convergence called.&quot;</span><span class="p">)</span>
+    <span class="n">plot_funcs</span> <span class="o">=</span> <span class="n">plot_funcs_dummy</span>
+<span class="c1"># --- End Plot Funcs Import ---</span>
+
+<div class="viewcode-block" id="project_tensor_to_scalar_space">
+<a class="viewcode-back" href="../../src.html#src.hessian_recovery.project_tensor_to_scalar_space">[docs]</a>
+<span class="k">def</span> <span class="nf">project_tensor_to_scalar_space</span><span class="p">(</span><span class="n">tensor_field</span><span class="p">,</span> <span class="n">V_scalar</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Projected Scalar&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Projects a component of a tensor field to a scalar FunctionSpace.&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">TrialFunction</span><span class="p">(</span><span class="n">V_scalar</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">TestFunction</span><span class="p">(</span><span class="n">V_scalar</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">dx</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">tensor_field</span> <span class="o">*</span> <span class="n">q</span> <span class="o">*</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">dx</span>
+    <span class="n">proj_func</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">V_scalar</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">dolfin</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">L</span><span class="p">,</span> <span class="n">proj_func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">proj_func</span></div>
+
+
+<div class="viewcode-block" id="get_hessian_frobenius_norm_fenics">
+<a class="viewcode-back" href="../../src.html#src.hessian_recovery.get_hessian_frobenius_norm_fenics">[docs]</a>
+<span class="k">def</span> <span class="nf">get_hessian_frobenius_norm_fenics</span><span class="p">(</span><span class="n">u_solution</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recovers Hessian components and computes the Frobenius norm at nodes.</span>
+<span class="sd">    Inspired by Rowbottom et al. (2025) Appendix A.2[cite: 254].</span>
+<span class="sd">    Args:</span>
+<span class="sd">        u_solution (dolfin.Function): The FEM solution (scalar).</span>
+<span class="sd">        mesh (dolfin.Mesh): The FEniCS mesh.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Nodal values of the Frobenius norm of the Hessian.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">V_scalar</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># P1 space for Hessian components</span>
+    
+    <span class="c1"># Compute gradients</span>
+    <span class="n">grad_u</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u_solution</span><span class="p">)</span> <span class="c1"># This is a vector</span>
+
+    <span class="c1"># H_xx: project(grad_u[0].dx(0), V_scalar)</span>
+    <span class="c1"># H_xy: project(grad_u[0].dx(1), V_scalar) (or grad_u[1].dx(0))</span>
+    <span class="c1"># H_yy: project(grad_u[1].dx(1), V_scalar)</span>
+
+    <span class="c1"># Weak form for H_ij = d/dx_j (d_u/dx_i)</span>
+    <span class="c1"># For H_xx: d/dx (du/dx)</span>
+    <span class="c1"># L = -dolfin.inner(dolfin.grad(grad_u[0]), dolfin.grad(q)[0]) * dolfin.dx # Incorrect formulation from paper for H_ij*v</span>
+    <span class="c1"># The paper&#39;s Appendix A.2 equation (12) is:</span>
+    <span class="c1"># -\int_{\Omega}\partial_{i}u\partial_{j}v~dx=\int_{\Omega}H_{ij}v~dx</span>
+    <span class="c1"># This is problematic for P1 as u is P1, so \partial_i u is P0 (discontinuous).</span>
+    <span class="c1"># A more common Zienkiewicz-Zhu style recovery or L2 projection of derivatives is often used.</span>
+    <span class="c1"># The paper solves for H_ij such that \int H_ij v = -\int \partial_i u \partial_j v</span>
+    <span class="c1"># For P1 elements, derivatives of u are cell-wise constant.</span>
+    <span class="c1"># A simpler approach (though not exactly the paper&#39;s weak form for H_ij) is to project gradients.</span>
+
+    <span class="c1"># Let&#39;s use a simpler gradient-based feature as a proxy for curvature/Hessian norm here,</span>
+    <span class="c1"># as full Hessian recovery for P1 is non-trivial and the paper&#39;s weak form needs careful interpretation.</span>
+    <span class="c1"># The paper itself mentions &quot;the Frobenius norm ||H||_F ... is fed as an input&quot;.</span>
+    <span class="c1"># We can use the L2 norm of the gradient as a simpler &quot;activity&quot; measure.</span>
+    
+    <span class="n">grad_u_sq_l2</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">dolfin</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">grad_u</span><span class="p">,</span> <span class="n">grad_u</span><span class="p">),</span> <span class="n">V_scalar</span><span class="p">)</span>
+    <span class="c1"># You might want to apply further smoothing or use a more sophisticated recovery.</span>
+    
+    <span class="c1"># For this example, let&#39;s use grad_u_sq_l2 as the &quot;curvature-like&quot; feature.</span>
+    <span class="c1"># A true Hessian norm would require proper recovery of all H_ij components.</span>
+    <span class="c1"># If using the paper&#39;s method, ensure proper dolfin-adjoint setup if differentiating through this.</span>
+    
+    <span class="c1"># CITATION for concept: Rowbottom et al. (2025) [cite: 1, 335] mention using the Frobenius norm of the Hessian</span>
+    <span class="c1"># as an input feature[cite: 85, 255]. The weak form for H_ij is in their Appendix A.2[cite: 254].</span>
+    <span class="c1"># The code below is a simplification using gradient norm.</span>
+    
+    <span class="n">curvature_feature_nodal</span> <span class="o">=</span> <span class="n">grad_u_sq_l2</span><span class="o">.</span><span class="n">compute_vertex_values</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    
+    <span class="c1"># Normalize if desired</span>
+    <span class="c1"># curvature_feature_nodal = (curvature_feature_nodal - np.min(curvature_feature_nodal)) / \</span>
+    <span class="c1">#                           (np.max(curvature_feature_nodal) - np.min(curvature_feature_nodal) + 1e-6)</span>
+                              
+    <span class="k">return</span> <span class="n">curvature_feature_nodal</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># Ensure shape [num_nodes, 1]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src package &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src.models package" href="src.models.html" />
+    <link rel="prev" title="src" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DNN_mesh_refienement_for_FEM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">src package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html">src.models package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.config">src.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.data_generation">src.data_generation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.data_generation.generate_dataset"><code class="docutils literal notranslate"><span class="pre">generate_dataset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.fem_utils">src.fem_utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.fem_utils.calculate_l2_error"><code class="docutils literal notranslate"><span class="pre">calculate_l2_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.fem_utils.get_solution_based_monitor_function"><code class="docutils literal notranslate"><span class="pre">get_solution_based_monitor_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.fem_utils.solve_fem_problem"><code class="docutils literal notranslate"><span class="pre">solve_fem_problem()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.fenics_mesh_to_pyg_data">src.fenics_mesh_to_pyg_data module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.fenics_mesh_to_pyg_data.fenics_mesh_to_pyg_data"><code class="docutils literal notranslate"><span class="pre">fenics_mesh_to_pyg_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.hessian_recovery">src.hessian_recovery module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.hessian_recovery.get_hessian_frobenius_norm_fenics"><code class="docutils literal notranslate"><span class="pre">get_hessian_frobenius_norm_fenics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.hessian_recovery.project_tensor_to_scalar_space"><code class="docutils literal notranslate"><span class="pre">project_tensor_to_scalar_space()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.json_to_latex">src.json_to_latex module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.json_to_latex.escape_latex"><code class="docutils literal notranslate"><span class="pre">escape_latex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.json_to_latex.format_ms_value"><code class="docutils literal notranslate"><span class="pre">format_ms_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.json_to_latex.format_stat_value"><code class="docutils literal notranslate"><span class="pre">format_stat_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.json_to_latex.generate_comparison_table"><code class="docutils literal notranslate"><span class="pre">generate_comparison_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.json_to_latex.generate_stats_table"><code class="docutils literal notranslate"><span class="pre">generate_stats_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.json_to_latex.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.main">src.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.mesh_generators_2">src.mesh_generators_2 module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.mesh_generators_2.create_pipe_with_obstacle_mesh_gmsh"><code class="docutils literal notranslate"><span class="pre">create_pipe_with_obstacle_mesh_gmsh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.mesh_generators_2.create_square_mesh"><code class="docutils literal notranslate"><span class="pre">create_square_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.mesh_utils">src.mesh_utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.mesh_utils.check_mesh_quality"><code class="docutils literal notranslate"><span class="pre">check_mesh_quality()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.mesh_utils.dummy_classical_r_adaptivity"><code class="docutils literal notranslate"><span class="pre">dummy_classical_r_adaptivity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.mesh_utils.get_boundary_nodes"><code class="docutils literal notranslate"><span class="pre">get_boundary_nodes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.plot_funcs">src.plot_funcs module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.cuda_status"><code class="docutils literal notranslate"><span class="pre">cuda_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.density_plot_matrix"><code class="docutils literal notranslate"><span class="pre">density_plot_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.loss_plot"><code class="docutils literal notranslate"><span class="pre">loss_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_accuracy_vs_cost"><code class="docutils literal notranslate"><span class="pre">plot_accuracy_vs_cost()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_accuracy_vs_time"><code class="docutils literal notranslate"><span class="pre">plot_accuracy_vs_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_convergence"><code class="docutils literal notranslate"><span class="pre">plot_convergence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_gat_training_loss"><code class="docutils literal notranslate"><span class="pre">plot_gat_training_loss()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_time_comparison"><code class="docutils literal notranslate"><span class="pre">plot_time_comparison()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_wl_histograms"><code class="docutils literal notranslate"><span class="pre">plot_wl_histograms()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.predVStrue"><code class="docutils literal notranslate"><span class="pre">predVStrue()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.weisfeiler_lehman_test"><code class="docutils literal notranslate"><span class="pre">weisfeiler_lehman_test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.utils">src.utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.utils.Tee"><code class="docutils literal notranslate"><span class="pre">Tee</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DNN_mesh_refienement_for_FEM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+      <li class="breadcrumb-item active">src package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/src.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="src-package">
+<h1>src package<a class="headerlink" href="#src-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src.models.html">src.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.models.html#module-src.models.GAT">src.models.GAT module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.models.html#src.models.GAT.RAdaptGAT"><code class="docutils literal notranslate"><span class="pre">RAdaptGAT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#src.models.GAT.RAdaptGAT.forward"><code class="docutils literal notranslate"><span class="pre">RAdaptGAT.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.models.html#src-models-gnn-module">src.models.GNN module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.models.html#module-src.models.GraphSAGE">src.models.GraphSAGE module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.models.html#src.models.GraphSAGE.RAdaptGraphSAGE"><code class="docutils literal notranslate"><span class="pre">RAdaptGraphSAGE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#src.models.GraphSAGE.RAdaptGraphSAGE.forward"><code class="docutils literal notranslate"><span class="pre">RAdaptGraphSAGE.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.models.html#module-src.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-src.config">
+<span id="src-config-module"></span><h2>src.config module<a class="headerlink" href="#module-src.config" title="Link to this heading"></a></h2>
+</section>
+<section id="module-src.data_generation">
+<span id="src-data-generation-module"></span><h2>src.data_generation module<a class="headerlink" href="#module-src.data_generation" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.data_generation.generate_dataset">
+<span class="sig-prename descclassname"><span class="pre">src.data_generation.</span></span><span class="sig-name descname"><span class="pre">generate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_first_sample_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/data_generation.html#generate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.data_generation.generate_dataset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-src.fem_utils">
+<span id="src-fem-utils-module"></span><h2>src.fem_utils module<a class="headerlink" href="#module-src.fem_utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.fem_utils.calculate_l2_error">
+<span class="sig-prename descclassname"><span class="pre">src.fem_utils.</span></span><span class="sig-name descname"><span class="pre">calculate_l2_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_numerical</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/fem_utils.html#calculate_l2_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.fem_utils.calculate_l2_error" title="Link to this definition"></a></dt>
+<dd><p>Calculates the L2 error of the numerical solution against an exact solution.
+Returns -1.0 if no exact solution is defined for the mesh_type, -2.0 if u_numerical is None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.fem_utils.get_solution_based_monitor_function">
+<span class="sig-prename descclassname"><span class="pre">src.fem_utils.</span></span><span class="sig-name descname"><span class="pre">get_solution_based_monitor_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_solution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/fem_utils.html#get_solution_based_monitor_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.fem_utils.get_solution_based_monitor_function" title="Link to this definition"></a></dt>
+<dd><p>Generates a monitor function based on the L2 norm of the gradient of the FEM solution.
+Returns a NumPy array of nodal values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.fem_utils.solve_fem_problem">
+<span class="sig-prename descclassname"><span class="pre">src.fem_utils.</span></span><span class="sig-name descname"><span class="pre">solve_fem_problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/fem_utils.html#solve_fem_problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.fem_utils.solve_fem_problem" title="Link to this definition"></a></dt>
+<dd><p>Solves a Poisson problem on the given mesh.
+-Laplace(u) = f
+u = u_D on boundary</p>
+</dd></dl>
+
+</section>
+<section id="module-src.fenics_mesh_to_pyg_data">
+<span id="src-fenics-mesh-to-pyg-data-module"></span><h2>src.fenics_mesh_to_pyg_data module<a class="headerlink" href="#module-src.fenics_mesh_to_pyg_data" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.fenics_mesh_to_pyg_data.fenics_mesh_to_pyg_data">
+<span class="sig-prename descclassname"><span class="pre">src.fenics_mesh_to_pyg_data.</span></span><span class="sig-name descname"><span class="pre">fenics_mesh_to_pyg_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/fenics_mesh_to_pyg_data.html#fenics_mesh_to_pyg_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.fenics_mesh_to_pyg_data.fenics_mesh_to_pyg_data" title="Link to this definition"></a></dt>
+<dd><p>Converts a FEniCS (dolfin) mesh to a PyTorch Geometric Data object.
+Node features (‘x’) include coordinates and optional additional features.
+‘pos’ stores only the coordinates for PyG visualization/geometric ops.
+Edges (‘edge_index’) are defined between nodes sharing a cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> (<em>dolfin.Mesh</em>) – The FEniCS mesh.</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – The torch device (‘cuda’ or ‘cpu’).</p></li>
+<li><p><strong>additional_features</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – A NumPy array of shape [num_nodes, num_add_features]
+to be concatenated with coordinates.
+Typically, these could be monitor function values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.hessian_recovery">
+<span id="src-hessian-recovery-module"></span><h2>src.hessian_recovery module<a class="headerlink" href="#module-src.hessian_recovery" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.hessian_recovery.get_hessian_frobenius_norm_fenics">
+<span class="sig-prename descclassname"><span class="pre">src.hessian_recovery.</span></span><span class="sig-name descname"><span class="pre">get_hessian_frobenius_norm_fenics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_solution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/hessian_recovery.html#get_hessian_frobenius_norm_fenics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.hessian_recovery.get_hessian_frobenius_norm_fenics" title="Link to this definition"></a></dt>
+<dd><p>Recovers Hessian components and computes the Frobenius norm at nodes.
+Inspired by Rowbottom et al. (2025) Appendix A.2[cite: 254].
+:type u_solution: 
+:param u_solution: The FEM solution (scalar).
+:type u_solution: dolfin.Function
+:type mesh: 
+:param mesh: The FEniCS mesh.
+:type mesh: dolfin.Mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nodal values of the Frobenius norm of the Hessian.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.hessian_recovery.project_tensor_to_scalar_space">
+<span class="sig-prename descclassname"><span class="pre">src.hessian_recovery.</span></span><span class="sig-name descname"><span class="pre">project_tensor_to_scalar_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Projected</span> <span class="pre">Scalar'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/hessian_recovery.html#project_tensor_to_scalar_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.hessian_recovery.project_tensor_to_scalar_space" title="Link to this definition"></a></dt>
+<dd><p>Projects a component of a tensor field to a scalar FunctionSpace.</p>
+</dd></dl>
+
+</section>
+<section id="module-src.json_to_latex">
+<span id="src-json-to-latex-module"></span><h2>src.json_to_latex module<a class="headerlink" href="#module-src.json_to_latex" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.json_to_latex.escape_latex">
+<span class="sig-prename descclassname"><span class="pre">src.json_to_latex.</span></span><span class="sig-name descname"><span class="pre">escape_latex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/json_to_latex.html#escape_latex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.json_to_latex.escape_latex" title="Link to this definition"></a></dt>
+<dd><p>Escapes special LaTeX characters in a string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.json_to_latex.format_ms_value">
+<span class="sig-prename descclassname"><span class="pre">src.json_to_latex.</span></span><span class="sig-name descname"><span class="pre">format_ms_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/json_to_latex.html#format_ms_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.json_to_latex.format_ms_value" title="Link to this definition"></a></dt>
+<dd><p>Formats a time value from seconds to milliseconds.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.json_to_latex.format_stat_value">
+<span class="sig-prename descclassname"><span class="pre">src.json_to_latex.</span></span><span class="sig-name descname"><span class="pre">format_stat_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sci_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/json_to_latex.html#format_stat_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.json_to_latex.format_stat_value" title="Link to this definition"></a></dt>
+<dd><p>Formats a number for the stats table, using scientific notation for small values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.json_to_latex.generate_comparison_table">
+<span class="sig-prename descclassname"><span class="pre">src.json_to_latex.</span></span><span class="sig-name descname"><span class="pre">generate_comparison_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/json_to_latex.html#generate_comparison_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.json_to_latex.generate_comparison_table" title="Link to this definition"></a></dt>
+<dd><p>Generates the simple mean time comparison LaTeX table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.json_to_latex.generate_stats_table">
+<span class="sig-prename descclassname"><span class="pre">src.json_to_latex.</span></span><span class="sig-name descname"><span class="pre">generate_stats_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/json_to_latex.html#generate_stats_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.json_to_latex.generate_stats_table" title="Link to this definition"></a></dt>
+<dd><p>Generates the detailed statistics LaTeX table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.json_to_latex.main">
+<span class="sig-prename descclassname"><span class="pre">src.json_to_latex.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/json_to_latex.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.json_to_latex.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-src.main">
+<span id="src-main-module"></span><h2>src.main module<a class="headerlink" href="#module-src.main" title="Link to this heading"></a></h2>
+</section>
+<section id="module-src.mesh_generators_2">
+<span id="src-mesh-generators-2-module"></span><h2>src.mesh_generators_2 module<a class="headerlink" href="#module-src.mesh_generators_2" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.mesh_generators_2.create_pipe_with_obstacle_mesh_gmsh">
+<span class="sig-prename descclassname"><span class="pre">src.mesh_generators_2.</span></span><span class="sig-name descname"><span class="pre">create_pipe_with_obstacle_mesh_gmsh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipe_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstacle_cx_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstacle_cy_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstacle_r_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_size_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/mesh_generators_2.html#create_pipe_with_obstacle_mesh_gmsh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.mesh_generators_2.create_pipe_with_obstacle_mesh_gmsh" title="Link to this definition"></a></dt>
+<dd><p>Creates a FEniCS mesh of a pipe with a circular obstacle using the Gmsh Python API
+and loads the .msh file directly into FEniCS.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.mesh_generators_2.create_square_mesh">
+<span class="sig-prename descclassname"><span class="pre">src.mesh_generators_2.</span></span><span class="sig-name descname"><span class="pre">create_square_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/mesh_generators_2.html#create_square_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.mesh_generators_2.create_square_mesh" title="Link to this definition"></a></dt>
+<dd><p>Creates a simple FEniCS UnitSquareMesh.
+Stores nx and ny in the dimensions dictionary.</p>
+</dd></dl>
+
+</section>
+<section id="module-src.mesh_utils">
+<span id="src-mesh-utils-module"></span><h2>src.mesh_utils module<a class="headerlink" href="#module-src.mesh_utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.mesh_utils.check_mesh_quality">
+<span class="sig-prename descclassname"><span class="pre">src.mesh_utils.</span></span><span class="sig-name descname"><span class="pre">check_mesh_quality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/mesh_utils.html#check_mesh_quality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.mesh_utils.check_mesh_quality" title="Link to this definition"></a></dt>
+<dd><p>Checks mesh quality by looking at minimum cell volume.
+Returns (bool: quality_ok, float: min_cell_volume_value)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.mesh_utils.dummy_classical_r_adaptivity">
+<span class="sig-prename descclassname"><span class="pre">src.mesh_utils.</span></span><span class="sig-name descname"><span class="pre">dummy_classical_r_adaptivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/mesh_utils.html#dummy_classical_r_adaptivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.mesh_utils.dummy_classical_r_adaptivity" title="Link to this definition"></a></dt>
+<dd><p>Performs a simple r-adaptivity step.
+Boundary nodes are kept fixed to their original positions.
+Interior nodes are moved based on the monitor function.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.mesh_utils.get_boundary_nodes">
+<span class="sig-prename descclassname"><span class="pre">src.mesh_utils.</span></span><span class="sig-name descname"><span class="pre">get_boundary_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/mesh_utils.html#get_boundary_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.mesh_utils.get_boundary_nodes" title="Link to this definition"></a></dt>
+<dd><p>Identifies boundary nodes of a FEniCS mesh.</p>
+</dd></dl>
+
+</section>
+<section id="module-src.plot_funcs">
+<span id="src-plot-funcs-module"></span><h2>src.plot_funcs module<a class="headerlink" href="#module-src.plot_funcs" title="Link to this heading"></a></h2>
+<p>Functions for data visualization and logging</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.cuda_status">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">cuda_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#cuda_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.cuda_status" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.density_plot_matrix">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">density_plot_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#density_plot_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.density_plot_matrix" title="Link to this definition"></a></dt>
+<dd><p>Plot KDE (Kernel Density Estimate), used to get a rough understanding of how
+the vertexes are spaced.
+:type matrix: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>
+:param matrix: The input matrix (e.g., node coordinates).
+:type matrix: np.ndarray
+:type output: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>
+:param output: Directory to save the plot.
+:type output: str
+:type title: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>
+:param title: Custom title for the plot. If empty, a default title is used.
+:type title: str
+:type show: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>
+:param show: Whether to display the plot interactively.
+:type show: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.loss_plot">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">loss_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_loss_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#loss_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.loss_plot" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_accuracy_vs_cost">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_accuracy_vs_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classical_costs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classical_accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_costs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Computational</span> <span class="pre">Cost</span> <span class="pre">(e.g.,</span> <span class="pre">Nodes)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FE</span> <span class="pre">Solution</span> <span class="pre">Error</span> <span class="pre">(e.g.,</span> <span class="pre">L2</span> <span class="pre">Norm)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Accuracy</span> <span class="pre">vs.</span> <span class="pre">Computational</span> <span class="pre">Cost</span> <span class="pre">Comparison'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_accuracy_vs_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_accuracy_vs_cost" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_accuracy_vs_time">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_accuracy_vs_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classical_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classical_accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_accuracies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Inference</span> <span class="pre">Time</span> <span class="pre">(s)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accuracy_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FE</span> <span class="pre">Solution</span> <span class="pre">Error</span> <span class="pre">(e.g.,</span> <span class="pre">L2</span> <span class="pre">Norm)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Accuracy</span> <span class="pre">vs.</span> <span class="pre">Inference</span> <span class="pre">Time</span> <span class="pre">Comparison'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_accuracy_vs_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_accuracy_vs_time" title="Link to this definition"></a></dt>
+<dd><p>Generates a scatter plot comparing the accuracy (error) vs. time
+of two methods. Lower and to the left is better.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_convergence">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_convergence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classical_dofs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classical_errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_dofs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dof_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Degrees</span> <span class="pre">of</span> <span class="pre">Freedom</span> <span class="pre">(DoF)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FE</span> <span class="pre">Solution</span> <span class="pre">Error</span> <span class="pre">(e.g.,</span> <span class="pre">L2</span> <span class="pre">Norm)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Convergence</span> <span class="pre">Plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_convergence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_convergence" title="Link to this definition"></a></dt>
+<dd><p>Generates a line plot comparing the convergence (error vs. DoF/nodes)
+of two methods.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_gat_training_loss">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_gat_training_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Loss'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GAT</span> <span class="pre">Model</span> <span class="pre">Training</span> <span class="pre">Progress'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_gat_training_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_gat_training_loss" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_time_comparison">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_time_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classical_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Mesh</span> <span class="pre">Optimization</span> <span class="pre">Time</span> <span class="pre">(s)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Mesh</span> <span class="pre">Optimization</span> <span class="pre">Step</span> <span class="pre">Time</span> <span class="pre">Comparison'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_box_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_time_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_time_comparison" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_wl_histograms">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_wl_histograms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_history</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Graph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_wl_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_wl_histograms" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.predVStrue">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">predVStrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label_val_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_val_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_train_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_train_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#predVStrue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.predVStrue" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.weisfeiler_lehman_test">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">weisfeiler_lehman_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#weisfeiler_lehman_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.weisfeiler_lehman_test" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-src.utils">
+<span id="src-utils-module"></span><h2>src.utils module<a class="headerlink" href="#module-src.utils" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.utils.Tee">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">Tee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'a'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/utils.html#Tee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.Tee" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to redirect stdout and stderr to both the console and a file.
+Acts as a context manager.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.Tee.flush">
+<span class="sig-name descname"><span class="pre">flush</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/utils.html#Tee.flush"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.Tee.flush" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.utils.Tee.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/utils.html#Tee.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.Tee.write" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-src">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-src" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="src" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.models.html" class="btn btn-neutral float-right" title="src.models package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1980, Erling Tennøy Nordtvedt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

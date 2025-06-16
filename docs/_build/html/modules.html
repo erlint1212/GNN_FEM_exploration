@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GAT_r_adaptivity &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
+  <title>src &mdash; DNN_mesh_refienement_for_FEM 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="GAT_r_adaptivity package" href="GAT_r_adaptivity.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="performance_analysis.html" /> 
+    <link rel="next" title="src package" href="src.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="quickstart.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,8 +45,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GAT_r_adaptivity</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html">GAT_r_adaptivity package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">src</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.html">src package</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
@@ -66,7 +66,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">GAT_r_adaptivity</li>
+      <li class="breadcrumb-item active">src</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,38 +76,87 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="gat-r-adaptivity">
-<h1>GAT_r_adaptivity<a class="headerlink" href="#gat-r-adaptivity" title="Link to this heading"></a></h1>
+  <section id="src">
+<h1>src<a class="headerlink" href="#src" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="GAT_r_adaptivity.html">GAT_r_adaptivity package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.models.html">GAT_r_adaptivity.models package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="GAT_r_adaptivity.models.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="GAT_r_adaptivity.models.html#gat-r-adaptivity-models-gat-module">GAT_r_adaptivity.models.GAT module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="GAT_r_adaptivity.models.html#module-GAT_r_adaptivity.models">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src.html">src package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.models.html">src.models package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#module-src.models.GAT">src.models.GAT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#src-models-gnn-module">src.models.GNN module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#module-src.models.GraphSAGE">src.models.GraphSAGE module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.models.html#module-src.models">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#gat-r-adaptivity-fenics-mesh-to-pyg-data-module">GAT_r_adaptivity.fenics_mesh_to_pyg_data module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#module-GAT_r_adaptivity.plot_funcs">GAT_r_adaptivity.plot_funcs module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.cuda_status"><code class="docutils literal notranslate"><span class="pre">cuda_status()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.density_plot_matrix"><code class="docutils literal notranslate"><span class="pre">density_plot_matrix()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.loss_plot"><code class="docutils literal notranslate"><span class="pre">loss_plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.plot_accuracy_vs_cost"><code class="docutils literal notranslate"><span class="pre">plot_accuracy_vs_cost()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.plot_convergence"><code class="docutils literal notranslate"><span class="pre">plot_convergence()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.plot_gat_training_loss"><code class="docutils literal notranslate"><span class="pre">plot_gat_training_loss()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.plot_time_comparison"><code class="docutils literal notranslate"><span class="pre">plot_time_comparison()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.plot_wl_histograms"><code class="docutils literal notranslate"><span class="pre">plot_wl_histograms()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.predVStrue"><code class="docutils literal notranslate"><span class="pre">predVStrue()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="GAT_r_adaptivity.html#GAT_r_adaptivity.plot_funcs.weisfeiler_lehman_test"><code class="docutils literal notranslate"><span class="pre">weisfeiler_lehman_test()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.config">src.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.data_generation">src.data_generation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.data_generation.generate_dataset"><code class="docutils literal notranslate"><span class="pre">generate_dataset()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#gat-r-adaptivity-simp-burgers-r-adapt-module">GAT_r_adaptivity.simp_burgers_r_adapt module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#gat-r-adaptivity-simp-burgers-r-adapt-old-module">GAT_r_adaptivity.simp_burgers_r_adapt_old module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GAT_r_adaptivity.html#module-GAT_r_adaptivity">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.fem_utils">src.fem_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.fem_utils.calculate_l2_error"><code class="docutils literal notranslate"><span class="pre">calculate_l2_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.fem_utils.get_solution_based_monitor_function"><code class="docutils literal notranslate"><span class="pre">get_solution_based_monitor_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.fem_utils.solve_fem_problem"><code class="docutils literal notranslate"><span class="pre">solve_fem_problem()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.fenics_mesh_to_pyg_data">src.fenics_mesh_to_pyg_data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.fenics_mesh_to_pyg_data.fenics_mesh_to_pyg_data"><code class="docutils literal notranslate"><span class="pre">fenics_mesh_to_pyg_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.hessian_recovery">src.hessian_recovery module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.hessian_recovery.get_hessian_frobenius_norm_fenics"><code class="docutils literal notranslate"><span class="pre">get_hessian_frobenius_norm_fenics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.hessian_recovery.project_tensor_to_scalar_space"><code class="docutils literal notranslate"><span class="pre">project_tensor_to_scalar_space()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.json_to_latex">src.json_to_latex module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.json_to_latex.escape_latex"><code class="docutils literal notranslate"><span class="pre">escape_latex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.json_to_latex.format_ms_value"><code class="docutils literal notranslate"><span class="pre">format_ms_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.json_to_latex.format_stat_value"><code class="docutils literal notranslate"><span class="pre">format_stat_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.json_to_latex.generate_comparison_table"><code class="docutils literal notranslate"><span class="pre">generate_comparison_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.json_to_latex.generate_stats_table"><code class="docutils literal notranslate"><span class="pre">generate_stats_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.json_to_latex.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.main">src.main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.mesh_generators_2">src.mesh_generators_2 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.mesh_generators_2.create_pipe_with_obstacle_mesh_gmsh"><code class="docutils literal notranslate"><span class="pre">create_pipe_with_obstacle_mesh_gmsh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.mesh_generators_2.create_square_mesh"><code class="docutils literal notranslate"><span class="pre">create_square_mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.mesh_utils">src.mesh_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.mesh_utils.check_mesh_quality"><code class="docutils literal notranslate"><span class="pre">check_mesh_quality()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.mesh_utils.dummy_classical_r_adaptivity"><code class="docutils literal notranslate"><span class="pre">dummy_classical_r_adaptivity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.mesh_utils.get_boundary_nodes"><code class="docutils literal notranslate"><span class="pre">get_boundary_nodes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.plot_funcs">src.plot_funcs module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.cuda_status"><code class="docutils literal notranslate"><span class="pre">cuda_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.density_plot_matrix"><code class="docutils literal notranslate"><span class="pre">density_plot_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.loss_plot"><code class="docutils literal notranslate"><span class="pre">loss_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.plot_accuracy_vs_cost"><code class="docutils literal notranslate"><span class="pre">plot_accuracy_vs_cost()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.plot_accuracy_vs_time"><code class="docutils literal notranslate"><span class="pre">plot_accuracy_vs_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.plot_convergence"><code class="docutils literal notranslate"><span class="pre">plot_convergence()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.plot_gat_training_loss"><code class="docutils literal notranslate"><span class="pre">plot_gat_training_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.plot_time_comparison"><code class="docutils literal notranslate"><span class="pre">plot_time_comparison()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.plot_wl_histograms"><code class="docutils literal notranslate"><span class="pre">plot_wl_histograms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.predVStrue"><code class="docutils literal notranslate"><span class="pre">predVStrue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.plot_funcs.weisfeiler_lehman_test"><code class="docutils literal notranslate"><span class="pre">weisfeiler_lehman_test()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src.utils">src.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.html#src.utils.Tee"><code class="docutils literal notranslate"><span class="pre">Tee</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.html#src.utils.Tee.flush"><code class="docutils literal notranslate"><span class="pre">Tee.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.html#src.utils.Tee.write"><code class="docutils literal notranslate"><span class="pre">Tee.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.html#module-src">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -118,8 +167,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="performance_analysis.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="GAT_r_adaptivity.html" class="btn btn-neutral float-right" title="GAT_r_adaptivity package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.html" class="btn btn-neutral float-right" title="src package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

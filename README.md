@@ -1,15 +1,8 @@
 # Ideas
 
-Main working folder is `./GAT_r_adaptivity/`
+Main working folder is `./src/`
 
-Run `./GAT_r_adaptivity/`
-
-
-## Resources
-
-* Torch Hub
-
-Inputs -> Numerical encoding -> Learns representation (patters/features/weights) -> Representation outputs
+Run `./src/main.py`
 
 ## Documentation
 
